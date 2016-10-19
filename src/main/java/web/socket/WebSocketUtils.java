@@ -6,6 +6,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Utility methods for Echo Web Server functionality.
@@ -20,6 +21,16 @@ public interface WebSocketUtils {
 	 */
 	static void log(String message) {
 		Optional<String> msg = Optional.ofNullable(message);
+		msg.ifPresent(System.out::println);
+	}
+	
+	/**
+	 * Login input message (current implementation print to Console).
+	 * @param generic ADT
+	 * @param function that generates log message for current ADT
+	 */
+	static <T> void log(T t, Function<T, String> f) {
+		Optional<String> msg = Optional.ofNullable(f.apply(t));
 		msg.ifPresent(System.out::println);
 	}
 
