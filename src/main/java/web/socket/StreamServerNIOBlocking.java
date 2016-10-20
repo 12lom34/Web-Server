@@ -9,7 +9,6 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
-import java.util.stream.IntStream;
 
 public class StreamServerNIOBlocking {
 	private static final Charset charset = Charset.forName("ISO-8859-1");
@@ -32,25 +31,20 @@ public class StreamServerNIOBlocking {
 	}
 
 	private static CharBuffer transform(CharBuffer buffer) {
-//		String stuffOfBuffer = buffer.array();
-		return null;
+		String stuffOfBuffer = String.valueOf(buffer.array()).toUpperCase();
+		return CharBuffer.wrap(stuffOfBuffer.toCharArray());
 	}
 
 	private static void handle(SocketChannel socketChannel) throws IOException {
 		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(8);
 		while (socketChannel.read(byteBuffer) != -1) {
 			byteBuffer.flip();
+			
 			CharBuffer charBuffer = decoder.decode(byteBuffer);
-//			char[] chb = charBuffer.array();
-//			WebSocketUtils.log(String.format("********** Char buffer stuff printing. Begin. ************"));
-//			IntStream.range(0, chb.length).mapToObj(i -> chb[i]).forEach(System.out::println); // debug
-//			WebSocketUtils.log(String.format("********** Char buffer stuff printing. End. **************"));
+			String currentServerTime = WebSocketUtils.getCurrentTimeInUTC();
+			WebSocketUtils.log(charBuffer, x -> String.format("Client request on NIOServerBlocking (%s). Message : %s.", currentServerTime, x));
 			byteBuffer.clear();
-			byteBuffer = encoder.encode(charBuffer);
-			byte[] hb = byteBuffer.array();
-//			WebSocketUtils.log(String.format("********** Byte buffer stuff printing. Begin. ************"));
-//			IntStream.range(0, hb.length).map(i -> hb[i]).forEach(System.out::println); // debug
-//			WebSocketUtils.log(String.format("********** Byte buffer stuff printing. End. **************"));
+			byteBuffer = encoder.encode(transform(charBuffer));
 
 			while (byteBuffer.hasRemaining()) {
 				socketChannel.write(byteBuffer);
