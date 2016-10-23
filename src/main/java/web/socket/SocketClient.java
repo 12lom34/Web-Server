@@ -1,12 +1,13 @@
 package web.socket;
 
+import static web.socket.WebSocketUtils.*;
 import java.io.*;
 import java.net.*;
 
 public class SocketClient {
     public static void main(String[] args) throws IOException {
         if (args.length != 2) {
-        	WebSocketUtils.log("Usage: java SocketClient <host name> <port number>");
+        	log("Usage: java SocketClient <host name> <port number>");
             System.exit(1);
         }
  
@@ -22,13 +23,13 @@ public class SocketClient {
             while ((userInput = stdIn.readLine()) != null) {
                 out.println(userInput);
                 String timeAsString = WebSocketUtils.getCurrentTime();
-                WebSocketUtils.log(in.readLine(), x -> String.format("Server response (%s). Message : %s.",  timeAsString /* free variable */, x));
+                log(in.readLine(), x -> String.format("Server response (%s). Message : %s.",  timeAsString /* free variable */, x));
             }
         } catch (UnknownHostException e) {
-        	WebSocketUtils.log(hostName, x ->"Don't know about host " + x);
+        	log("Don't know about host " + hostName);
             System.exit(1);
         } catch (IOException e) {
-        	WebSocketUtils.log(hostName, x ->"Couldn't get I/O for the connection to " + x);
+        	log("Couldn't get I/O for the connection to " + hostName);
             System.exit(1);
         } 
     }

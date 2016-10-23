@@ -1,5 +1,6 @@
 package web.socket;
 
+import static web.socket.WebSocketUtils.*;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -17,7 +18,7 @@ public class StreamServerNIOBlocking {
 
 	public static void main(String[] args) throws IOException {
 		if (args.length != 1) {
-			WebSocketUtils.log("Usage: java NIOServerBlockingImplementation <port number>");
+			log("Usage: java NIOServerBlockingImplementation <port number>");
 			System.exit(1);
 		}
 
@@ -30,26 +31,36 @@ public class StreamServerNIOBlocking {
 		}
 	}
 
+	/*
+	 * Transform chars into char buffer from low-case to upper-case.
+	 * @param buffer - buffer of chars
+	 * @return - modified buffer
+	 */
 	private static CharBuffer transform(CharBuffer buffer) {
 		String stuffOfBuffer = String.valueOf(buffer.array()).toUpperCase();
 		return CharBuffer.wrap(stuffOfBuffer.toCharArray());
 	}
 
+	/**
+	 * Handle client request and send response.
+	 * @param socketChannel - is server-end-point
+	 * @throws IOException
+	 */
 	private static void handle(SocketChannel socketChannel) throws IOException {
 		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(8);
-		while (socketChannel.read(byteBuffer) != -1) {
-			byteBuffer.flip();
+		while (socketChannel.read(byteBuffer) /* write data into a buffer */ != -1 ) {
+			byteBuffer.flip(); // switches a buffer from writing mode to reading mode
 			
+			// convert input from and to characters and processing them
 			CharBuffer charBuffer = decoder.decode(byteBuffer);
-			String currentServerTime = WebSocketUtils.getCurrentTimeInUTC();
-			WebSocketUtils.log(charBuffer, x -> String.format("Client request on NIOServerBlocking (%s). Message : %s.", currentServerTime, x));
+			log(charBuffer, x -> String.format("Client request on NIOServerBlocking (%s). Message : %s.", getCurrentTime(), x));
 			byteBuffer.clear();
 			byteBuffer = encoder.encode(transform(charBuffer));
 
 			while (byteBuffer.hasRemaining()) {
-				socketChannel.write(byteBuffer);
+				socketChannel.write(byteBuffer); // read from buffer into channel and send to client
 			}
-			byteBuffer.compact();
+			byteBuffer.compact(); // copies all unread data to the beginning of the buffer
 		}
 	}
 }

@@ -1,5 +1,6 @@
 package web.socket;
 
+import static web.socket.WebSocketUtils.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,7 +20,7 @@ public class SocketChannelClient {
 	
 	public static void main(String[] args) throws IOException {
 		if (args.length != 2) {
-			WebSocketUtils.log("Usage: java SocketChannelClient <host name> <port number>");
+			log("Usage: java SocketChannelClient <host name> <port number>");
 			System.exit(1);
 		}
 
@@ -34,23 +35,25 @@ public class SocketChannelClient {
 			while ((userInput = stdIn.readLine()) != null) {
 				// 1. Read input from Console and send it as request to server
 				CharBuffer charBuffer = CharBuffer.wrap(userInput);
-				String currentTime = WebSocketUtils.getCurrentTime();
-				WebSocketUtils.log(charBuffer, x -> String.format("Console input (time: %s). Message : %s.",  currentTime, x));
-				socketChannel.write(encoder.encode(charBuffer));
+				log(charBuffer, x -> String.format("Console input (time: %s). Message : %s.",  getCurrentTime(), x));
+				socketChannel.write(encoder.encode(charBuffer));  // read from buffer into channel and send to server
 				
 				// 2. Get response form server and print it
 				ByteBuffer byteBuffer = ByteBuffer.allocateDirect(8);
-				while (socketChannel.read(byteBuffer) != -1) {
-					byteBuffer.flip();
-					WebSocketUtils.log(decoder.decode(byteBuffer), x -> String.format("Response from server (time: %s). Message : %s.",  currentTime, x));
-					byteBuffer.clear();
+				while (socketChannel.read(byteBuffer) /* write data into a buffer */ != -1) {
+					byteBuffer.flip(); // switches a buffer from writing mode to reading mode
+					log(decoder.decode(byteBuffer), x -> String.format("Response from server (time: %s). Message : %s.",  getCurrentTime(), x));
+					byteBuffer.clear(); // "position" is set back to 0 and the "limit" to "capacity"; 
+										// the data in the buffer is not cleared, only the markers telling
+										// where you can write data into the buffer are
+
 				}
 			}
 		} catch (UnknownHostException e) {
-			WebSocketUtils.log(hostName, x -> "Don't know about host " + x);
+			log(hostName, x -> "Don't know about host " + x);
 			System.exit(1);
 		} catch (IOException e) {
-			WebSocketUtils.log(hostName, x -> "Couldn't get I/O for the connection to " + x);
+			log(hostName, x -> "Couldn't get I/O for the connection to " + x);
 			System.exit(1);
 		}
 	}

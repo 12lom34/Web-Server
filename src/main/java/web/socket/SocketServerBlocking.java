@@ -1,5 +1,6 @@
 package web.socket;
 
+import static web.socket.WebSocketUtils.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,7 +11,7 @@ import java.net.Socket;
 public class SocketServerBlocking {
 	public static void main(String[] args) throws IOException {
 		if (args.length != 1) {
-			WebSocketUtils.log("Usage: java EchoServer <port number>"); System.exit(1);
+			log("Usage: java EchoServer <port number>"); System.exit(1);
 		}
 
 		while (true) {
@@ -28,12 +29,12 @@ public class SocketServerBlocking {
 		try (PrintWriter out = new PrintWriter(s.getOutputStream(), true); BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));) {
 			String inputLine;
 			while ((inputLine = in.readLine()) != null) {
-				WebSocketUtils.log(String.format("Client request (%s). Message : %s.", WebSocketUtils.getCurrentTimeInUTC(), inputLine));
+				log(String.format("Client request (%s). Message : %s.", getCurrentTimeInUTC(), inputLine));
 				out.println(transform(inputLine));
 			}
 		} catch (IOException e) {
-			WebSocketUtils.log("Exception caught when trying to listen on port " + s.getLocalPort() + " or listening for a connection");
-			WebSocketUtils.log(e.getMessage());
+			log("Exception caught when trying to listen on port " + s.getLocalPort() + " or listening for a connection");
+			log(e.getMessage());
 		}
 	}
 }
